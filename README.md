@@ -1,9 +1,10 @@
-# Express routes versioning
+# Express Application Routes Versioning
 
 [![Build Status](https://travis-ci.com/jgrocott/express-app-route-versioning.svg?branch=master)](https://travis-ci.com/jgrocott/express-app-route-versioning)
+[![Coverage Status](https://coveralls.io/repos/github/jgrocott/express-app-route-versioning/badge.svg)](https://coveralls.io/github/jgrocott/express-app-route-versioning)
 
 
-Simple node.js module provides versioning for expressjs routes/api.
+Simple node.js module provides versioning for expressjs routes/api at an application level. 
 
 ## Install
 `npm i --save express-app-route-versioning`
@@ -39,7 +40,8 @@ Follows semver versioning format. Supports '^, ~' symbols for matching version n
          '1.0.0': v100,
          '2.0.0': v200,
       }, noMatchFoundCallback)(app);
-}
+    
+   module.exports = mountRoutes;
 
 ```
 Supporting '^,~' on server might appear as an anti-pattern considering how npm versioning works, where client controls the version. Here server controls the version (or it may not), and client fully trust the server. Typically the client and server belong to the same organization in these cases.
