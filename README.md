@@ -1,5 +1,8 @@
 # Express routes versioning
 
+[![Build Status](https://travis-ci.com/jgrocott/express-app-route-versioning.svg?branch=master)](https://travis-ci.com/jgrocott/express-app-route-versioning)
+
+
 Simple node.js module provides versioning for expressjs routes/api.
 
 ## Install
