@@ -1,3 +1,24 @@
+const Utils = require('util');
+
+/**
+ * Gets the version of the application either from accept-version headers
+ * or req.version property
+ * */
+function getVersion(req) {
+  let version;
+  if (req) {
+    if (!req.version) {
+      if (req.headers && req.headers['accept-version']) {
+        version = req.headers['accept-version'];
+      }
+    } else {
+      version = String(req.version);
+    }
+  }
+
+  return version;
+}
+
 /**
  * Given an array of versions, returns the latest version.
  * Follows semver versioning rules.
@@ -54,7 +75,7 @@ function findLatestVersion(versions) {
 
 function routesVersioning() {
   return function(args, notFoundMiddleware) {
-    if (!args || typeof args !== 'object' || require('util').isArray(args)) {
+    if (!args || typeof args !== 'object' || Utils.isArray(args)) {
       console.log('Input has to be either an object');
       return -1;
     }
@@ -111,7 +132,7 @@ function routesVersioning() {
       }
 
       if (notFoundMiddleware) {
-        notFoundMiddleware.call(that, app);
+        app.use(notFoundMiddleware);
       } else {
         // get the latest version when no version match found
         key = findLatestVersion(keys);
@@ -119,25 +140,6 @@ function routesVersioning() {
       }
     };
   };
-}
-
-/**
- * Gets the version of the application either from accept-version headers
- * or req.version property
- * */
-function getVersion(req) {
-  let version;
-  if (req) {
-    if (!req.version) {
-      if (req.headers && req.headers['accept-version']) {
-        version = req.headers['accept-version'];
-      }
-    } else {
-      version = String(req.version);
-    }
-  }
-
-  return version;
 }
 
 module.exports = routesVersioning;
