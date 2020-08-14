@@ -3,7 +3,7 @@
 Simple node.js module provides versioning for expressjs routes/api.
 
 ## Install
-`npm install express-routes-versioning`
+`npm i --save express-app-route-versioning`
 
 ## Usage
 
@@ -23,7 +23,7 @@ Follows semver versioning format. Supports '^, ~' symbols for matching version n
 
 
    // routes/index.js
-   const routesVersioning = require('express-routes-versioning')();
+   const routesVersioning = require('express-app-route-versioning')();
    const v100 = require('../v1.0.0/routes');
    const v200 = require('../v2.0.0/routes');
 
