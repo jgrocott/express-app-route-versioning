@@ -5,9 +5,9 @@ function routesVersioning() {
          console.log('Input has to be either an object');
          return -1;
       }
-      return function(req, res, next) {
+      return function(app) {
          var that = this;
-         var version = getVersion(req);
+         var version = getVersion(app.request);
          var keys = Object.keys(args);
          var key;
          var tempKey;
@@ -15,10 +15,10 @@ function routesVersioning() {
          var tempVersion;
          if (!version) {
             if (notFoundMiddleware) {
-               notFoundMiddleware.call(that, req, res, next);
+               app.use(notFoundMiddleware)
             } else {
                key = findLatestVersion(keys);
-               args[key].call(that, req, res, next);
+               args[key].call(that, app);
             }
             return;
          }
@@ -42,16 +42,16 @@ function routesVersioning() {
                tempVersion = versionArr.join('.');
             }
             if (tempKey === tempVersion) {
-               args[key].call(that, req, res, next);
+               args[key].call(that, app);
                return;
             }
          }
          if (notFoundMiddleware) {
-            notFoundMiddleware.call(that, req, res, next);
+            notFoundMiddleware.call(that, app);
          } else {
             //get the latest version when no version match found
             key = findLatestVersion(keys);
-            args[key].call(that, req, res, next);
+            args[key].call(that, app);
          }
       }
    }

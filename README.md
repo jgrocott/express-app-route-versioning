@@ -1,9 +1,5 @@
 # Express routes versioning
 
-[![Build Status](https://travis-ci.org/Prasanna-sr/express-routes-versioning.svg?branch=master)](https://travis-ci.org/Prasanna-sr/express-routes-versioning) [![Coverage Status](https://coveralls.io/repos/github/Prasanna-sr/express-routes-versioning/badge.svg?branch=master)](https://coveralls.io/github/Prasanna-sr/express-routes-versioning?branch=master)
-[![npm version](https://badge.fury.io/js/express-routes-versioning.svg)](http://badge.fury.io/js/express-routes-versioning)
-
-
 Simple node.js module provides versioning for expressjs routes/api.
 
 ## Install
@@ -14,26 +10,34 @@ Simple node.js module provides versioning for expressjs routes/api.
 Follows semver versioning format. Supports '^, ~' symbols for matching version numbers.
 
 ```
-    var app = require('express')();
-    var routesVersioning = require('express-routes-versioning')();
-    app.listen(3000);
+   // app.js
+   const express = require('express');
+   const router = require('./routes');
 
-    app.get('/test', routesVersioning({
-       "1.0.0": respondV1,
-       "~2.2.1": respondV2
-    }));
+   // Mount all API related routes
+   router(app);
 
-    // curl -s -H 'accept-version: 1.0.0' localhost:3000/test
-    // version 1.0.0 or 1.0 or 1 !
-    function respondV1(req, res, next) {
-       res.status(200).send('ok v1');
-    }
+   app.listen(3000, () => {
+    console.log(`Server listening on port 3000`);
+   });
 
-    //curl -s -H 'accept-version: 2.2.0' localhost:3000/test
-    //Anything from 2.2.0 to 2.2.9
-    function respondV2(req, res, next) {
-       res.status(200).send('ok v2');
-    }
+
+   // routes/index.js
+   const routesVersioning = require('express-routes-versioning')();
+   const v100 = require('../v1.0.0/routes');
+   const v200 = require('../v2.0.0/routes');
+
+   const noMatchFoundCallback = (req, res, next) =>
+   // Version not found..
+   res.status(404).send(`API version is unsupported.`);
+
+   const mountRoutes = app =>
+      routesVersioning({
+         '1.0.0': v100,
+         '2.0.0': v200,
+      }, noMatchFoundCallback)(app);
+}
+
 ```
 Supporting '^,~' on server might appear as an anti-pattern considering how npm versioning works, where client controls the version. Here server controls the version (or it may not), and client fully trust the server. Typically the client and server belong to the same organization in these cases.
 
@@ -55,10 +59,6 @@ This can be overridden by using a middleware and providing version in `req.versi
 **How versions are matched ?**
 
 semver versioning format is used to match version if versions are provided in semver format, supports ^,~ symbols on the server, else direct mapping is used (for versions like 1, 1.1)
-
-## Examples
-
-Examples are available [here](https://github.com/Prasanna-sr/express-routes-versioning/tree/master/examples)
 
 ## Test
 

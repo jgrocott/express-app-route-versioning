@@ -1,6 +1,6 @@
 {
-  "name": "express-routes-versioning",
-  "version": "1.0.1",
+  "name": "express-app-route-versioning",
+  "version": "0.0.1",
   "description": "Node.js module provides versioning for expressjs routes/api",
   "main": "index.js",
   "scripts": {
@@ -8,15 +8,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Prasanna-sr/express-routes-versioning.git"
+    "url": "https://github.com/jgrocott/express-app-route-versioning.git"
   },
-  "keywords": ["routes", "api", "restful", "express", "version", "versioning"],
-  "author": "Prasanna Ramanujam",
+  "keywords": [
+    "routes",
+    "api",
+    "restful",
+    "express",
+    "version",
+    "versioning"
+  ],
+  "author": "JMG",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Prasanna-sr/express-routes-versioning/issues"
+    "url": "https://github.com/jgrocott/express-app-route-versioning/issues"
   },
-  "homepage": "https://github.com/Prasanna-sr/express-routes-versioning",
+  "homepage": "https://github.com/jgrocott/express-app-route-versioning",
   "devDependencies": {
     "coveralls": "^2.11.6",
     "express": "^4.13.4",
