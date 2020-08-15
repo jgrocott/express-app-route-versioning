@@ -1,6 +1,6 @@
 const assert = require('assert');
 const sinon = require('sinon');
-const routesVersioning = require('./../index')();
+const routesVersioning = require('./../index');
 
 describe('routes versioning', function() {
   let req;
@@ -48,17 +48,21 @@ describe('routes versioning', function() {
   });
 
   it('if accept-version header is present, appropriate callback should be called', function() {
+    const NoMatchFoundSpy = sinon.spy();
     const version1Spy = sinon.spy();
     const version2Spy = sinon.spy();
-    const middleware = routesVersioning({
-      '1.2.1': version1Spy,
-      '1.3.1': version2Spy,
-    });
+    routesVersioning(
+      {
+        '0.0.1': version1Spy,
+        '1.3.1': version2Spy,
+      },
+      NoMatchFoundSpy
+    )(app);
     app.request.headers = {};
-    app.request.headers['accept-version'] = '1.2.1';
-    middleware(app);
+    app.request.headers['accept-version'] = '0.0.1';
     assert.ok(version1Spy.calledOnce);
     assert.ok(version1Spy.calledWith(app));
+    assert.ok(NoMatchFoundSpy.notCalled);
   });
   it('when multiple version are provided, matching version should be called', function() {
     const version1Spy = sinon.spy();

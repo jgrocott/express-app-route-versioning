@@ -24,9 +24,6 @@
     "url": "https://github.com/jgrocott/express-app-route-versioning/issues"
   },
   "homepage": "https://github.com/jgrocott/express-app-route-versioning",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
     "eslint": "^6.1.0",

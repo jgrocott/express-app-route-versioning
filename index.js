@@ -73,72 +73,82 @@ function findLatestVersion(versions) {
   return versions[versions.length - 1];
 }
 
-function routesVersioning() {
-  return function(args, notFoundMiddleware) {
-    if (!args || typeof args !== 'object' || Utils.isArray(args)) {
-      console.log('Input has to be either an object');
-      return -1;
+/**
+ * Determines the version to use based on the request.
+ * @param {string} version
+ * @param {Object} args
+ */
+function determineVersionToUse(version, args) {
+  const keys = Object.keys(args);
+  let key;
+  let tempKey;
+  let versionArr;
+  let tempVersion;
+
+  for (let i = 0; i < keys.length; i++) {
+    key = keys[i];
+    versionArr = version.split('.');
+    if (key[0] === '~') {
+      tempKey = key.substr(1);
+      tempKey = tempKey
+        .split('.')
+        .slice(0, 2)
+        .join('.');
+      versionArr[1] = versionArr[1] || 0;
+      tempVersion = versionArr.slice(0, 2).join('.');
+    } else if (key[0] === '^') {
+      tempKey = key.substr(1);
+      tempKey = tempKey
+        .split('.')
+        .slice(0, 1)
+        .join('.');
+      tempVersion = versionArr.slice(0, 1).join('.');
+    } else {
+      tempKey = key;
+      versionArr[1] = versionArr[1] || 0;
+      versionArr[2] = versionArr[2] || 0;
+      tempVersion = versionArr.join('.');
     }
 
-    return function(app) {
-      const that = this;
-      const { request } = app;
-      const version = getVersion(request);
-      const keys = Object.keys(args);
-      let key;
-      let tempKey;
-      let versionArr;
-      let tempVersion;
-      if (!version) {
-        if (notFoundMiddleware) {
-          app.use(notFoundMiddleware);
-        } else {
-          key = findLatestVersion(keys);
-          args[key].call(that, app);
-        }
+    if (tempKey === tempVersion) {
+      return key;
+    }
+  }
 
-        return;
+  // get the latest version when no version match found
+  return findLatestVersion(keys);
+}
+
+function routesVersioning(args, notFoundMiddleware) {
+  if (!args || typeof args !== 'object' || Utils.isArray(args)) {
+    console.log('Input has to be an object');
+    return -1;
+  }
+
+  return function(app) {
+    // Get a collection of all versions configured
+    const routeVersionCollection = Object.entries(args);
+    // Mount all routes, prefixed with the requested version
+    routeVersionCollection.forEach(([routeVersion, router]) => {
+      app.use(`/${routeVersion}`, router);
+    });
+
+    return app.use(function(req, res, next) {
+      // Get the version requested by the client
+      const versionRequested = getVersion(req);
+      // Determine the version to use based on the request
+      const versionToUse = determineVersionToUse(versionRequested, args);
+      // Did we find what they were looking for?
+      const versionWasFound = versionRequested === versionToUse;
+      if (!versionWasFound && notFoundMiddleware) {
+        // Hit the users defined not found route
+        return notFoundMiddleware(req, res, next);
       }
 
-      for (let i = 0; i < keys.length; i++) {
-        key = keys[i];
-        versionArr = version.split('.');
-        if (key[0] === '~') {
-          tempKey = key.substr(1);
-          tempKey = tempKey
-            .split('.')
-            .slice(0, 2)
-            .join('.');
-          versionArr[1] = versionArr[1] || 0;
-          tempVersion = versionArr.slice(0, 2).join('.');
-        } else if (key[0] === '^') {
-          tempKey = key.substr(1);
-          tempKey = tempKey
-            .split('.')
-            .slice(0, 1)
-            .join('.');
-          tempVersion = versionArr.slice(0, 1).join('.');
-        } else {
-          tempKey = key;
-          versionArr[1] = versionArr[1] || 0;
-          versionArr[2] = versionArr[2] || 0;
-          tempVersion = versionArr.join('.');
-        }
-
-        if (tempKey === tempVersion) {
-          args[key].call(that, app);
-          return;
-        }
-      }
-
-      if (notFoundMiddleware) {
-        app.use(notFoundMiddleware);
-      } else {
-        // get the latest version when no version match found
-        key = findLatestVersion(keys);
-        args[key].call(that, app);
-      }
-    };
+      // Here's where the magic happens, redirect to our version prefixed routes
+      const newRoute = `/${versionToUse}${req.url}`;
+      return res.redirect(newRoute);
+    });
   };
 }
 
