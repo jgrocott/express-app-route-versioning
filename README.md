@@ -6,7 +6,7 @@
 
 Simple node.js module provides versioning for expressjs routes/api at an application level, providing segmentation of routes, controllers and services. 
 
-Please see [express-routes-versioning](https://github.com/Prasanna-sr/express-routes-versioning) repo for the original/alternative approach.
+Please see [express-routes-versioning](https://github.com/Prasanna-sr/express-routes-versioning) repo for the original/alternative approach. For more details on how they differ, see the section [Comparison to express-routes-versioning](#comparison-to-express-routes-versioning) 
 
 
 ## Install
@@ -49,7 +49,7 @@ module.exports = mountRoutes;
 ```
 Supporting '^,~' on server might appear as an anti-pattern considering how npm versioning works, where client controls the version. Here server controls the version (or it may not), and client fully trust the server. Typically the client and server belong to the same organization in these cases.
 
-**API**
+## API
 
 `routesVersioning(Options, NoMatchFoundCallback)`
 
@@ -58,17 +58,18 @@ Supporting '^,~' on server might appear as an anti-pattern considering how npm v
 **NoMatchFoundCallback** (optional)- called if request version doesn't match the version provided in the options. If this callback is not provided latest version callback is called.
 
 
-**How version is determined for each request ?**
+## How version is determined for each request ?
 
 Default behaviour is to use `accept-version` headers from the client.
 
 This can be overridden by using a middleware and providing version in `req.version` property.
 
-**How versions are matched ?**
+## How versions are matched ?
 
 semver versioning format is used to match version if versions are provided in semver format, supports ^,~ symbols on the server, else direct mapping is used (for versions like 1, 1.1)
 
-**How does this differ from express-route-versioning**
+## Comparison to express-routes-versioning
+
 The subtle different in this implementation is that it versions all routes at an application level, allowing for further segmentation of routes, controllers and related services. This can be best described by example.
 
 Previously, versioning routes was done like this;
