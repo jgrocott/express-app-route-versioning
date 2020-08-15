@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jgrocott/express-app-route-versioning.git"
+    "url": "git+https://github.com/jgrocott/express-app-route-versioning.git"
   },
   "keywords": [
     "routes",
@@ -44,5 +44,9 @@
     "mocha": "^2.4.5",
     "mocha-lcov-reporter": "^1.2.0",
     "sinon": "^1.17.3"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {}
 }
