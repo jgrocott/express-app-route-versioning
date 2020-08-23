@@ -25,7 +25,8 @@ function getVersion(req) {
  * Supports version types: 1, 1.0, 0.1, 1.0.0
  * Note: 1 is treated as 1.0.0
  * */
-function findLatestVersion(versions) {
+function findLatestVersion(args) {
+  const versions = Object.keys(args);
   versions.sort(function(v1, v2) {
     const v1Arr = v1.split('.');
     const v2Arr = v2.split('.');
@@ -78,7 +79,7 @@ function findLatestVersion(versions) {
  * @param {string} version
  * @param {Object} args
  */
-function determineVersionToUse(version, args) {
+function locateRequestedVersion(version, args) {
   const keys = Object.keys(args);
   let key;
   let tempKey;
@@ -114,9 +115,6 @@ function determineVersionToUse(version, args) {
       return key;
     }
   }
-
-  // get the latest version when no version match found
-  return findLatestVersion(keys);
 }
 
 function routesVersioning(args, notFoundMiddleware) {
@@ -126,29 +124,47 @@ function routesVersioning(args, notFoundMiddleware) {
   }
 
   return function(app) {
+    const middlware = app.use(function(req, res, next) {
+      // Get the version requested by the client
+      let versionRequested = getVersion(req);
+
+      if (!versionRequested) {
+        console.log('1');
+        versionRequested = findLatestVersion(args);
+        // Set the current version so we avoid a redirect loop
+        // req.version = versionRequested;
+        req.version = versionRequested;
+      } else {
+        console.log('2');
+        const versionFound = locateRequestedVersion(versionRequested, args);
+        if (!versionFound && notFoundMiddleware) {
+          // Hit the users defined not found route
+          return notFoundMiddleware(req, res, next);
+        }
+
+        if (!versionFound) {
+          versionRequested = findLatestVersion(args);
+        } else {
+          versionRequested = versionFound;
+        }
+      }
+
+      // Here's where the magic happens
+      const newRoute = `/${versionRequested}${req.url || ''}`;
+      req.url = newRoute;
+      next();
+    });
+
     // Get a collection of all versions configured
     const routeVersionCollection = Object.entries(args);
     // Mount all routes, prefixed with the requested version
     routeVersionCollection.forEach(([routeVersion, router]) => {
-      app.use(`/${routeVersion}`, router);
-    });
-
-    return app.use(function(req, res, next) {
-      // Get the version requested by the client
-      const versionRequested = getVersion(req);
-      // Determine the version to use based on the request
-      const versionToUse = determineVersionToUse(versionRequested, args);
-      // Did we find what they were looking for?
-      const versionWasFound = versionRequested === versionToUse;
-      if (!versionWasFound && notFoundMiddleware) {
-        // Hit the users defined not found route
-        return notFoundMiddleware(req, res, next);
+      if (router) {
+        app.use(`/${routeVersion}`, router);
       }
-
-      // Here's where the magic happens, redirect to our version prefixed routes
-      const newRoute = `/${versionToUse}${req.url}`;
-      return res.redirect(newRoute);
     });
+
+    return middlware;
   };
 }
 
