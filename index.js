@@ -129,13 +129,11 @@ function routesVersioning(args, notFoundMiddleware) {
       let versionRequested = getVersion(req);
 
       if (!versionRequested) {
-        console.log('1');
         versionRequested = findLatestVersion(args);
         // Set the current version so we avoid a redirect loop
         // req.version = versionRequested;
         req.version = versionRequested;
       } else {
-        console.log('2');
         const versionFound = locateRequestedVersion(versionRequested, args);
         if (!versionFound && notFoundMiddleware) {
           // Hit the users defined not found route
